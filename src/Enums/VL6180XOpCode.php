@@ -2,7 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Sensors\VL6180X\Enums;
 
-enum VL6180OpCode: int
+enum VL6180XOpCode: int
 {
     case DEVICE_ID_REGISTER = 0x000;
 

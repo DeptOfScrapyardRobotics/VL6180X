@@ -1,9 +1,11 @@
 {
     "name": "dept-of-scrapyard-robotics/vl6180x",
-    "description": "Drive VL61080 time-of-flight sensors over I2C with PHP",
+    "description": "Drive VL6180X time-of-flight sensors over I2C with PHP",
     "type": "library",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "keywords": [
+        "vl6180x",
+        "tof",
         "framework",
         "scrapyard-io"
     ],
@@ -17,16 +19,15 @@
     ],
     "require": {
         "php": "^8.3",
-        "waveforms/i2c": "^0.5.0",
-        "bare-metal/sensors": "^0.5.0",
-        "scrapyard-io/nuts-and-bolts": "^0.5.0"
+        "fabricate/circuits": "^0.6.0",
+        "gpio/contracts": "^0.6.0",
+        "gpio/i2c": "^0.6.0",
+        "gpio/digital": "^0.6.0",
+        "fabricate/nuts-and-bolts": "^0.6.0"
     },
     "suggest": {
-        "ext-posi": "^0.4.0",
-        "ext-ftdi": "^0.4.0",
-        "microscrap/posix": "^0.5.0",
-        "microscrap/mpsse": "^0.5.0",
-        "waveforms/digital": "^0.5.0"
+        "microscrap/i2c": "^0.5.0 - For direct linux-based I2C",
+        "microscrap/mpsse": "^0.5.0 - For I2C over an FTDI Serial-to-USB Device"
     },
     "autoload": {
         "psr-4": {
@@ -40,6 +41,16 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.6.x-dev"
+        },
+        "scrapyard-io": {
+            "providers": [
+                "DeptOfScrapyardRobotics\\Sensors\\VL6180X\\VL6180XServiceProvider"
+            ]
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

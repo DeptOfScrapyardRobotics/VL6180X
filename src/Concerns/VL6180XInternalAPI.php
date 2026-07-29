@@ -1,50 +1,46 @@
 <?php
 
-namespace DeptOfScrapyardRobotics\Sensors\VL6180X;
+namespace DeptOfScrapyardRobotics\Sensors\VL6180X\Concerns;
 
-use GPIO\Contracts\I2C\I2CCompatibleTransport;
-use BareMetal\Contracts\Circuits\BootScaffolding;
-use ScrapyardIO\NutsAndBolts\Concerns\Splices16Bits;
-use DeptOfScrapyardRobotics\Sensors\VL6180X\Enums\VL6180OpCode;
-use GPIO\Contracts\Digital\DigitalInputPin as DigitalInputInterface;
-use GPIO\Contracts\Digital\DigitalOutputPin as DigitalOutputInterface;
+use DeptOfScrapyardRobotics\Sensors\VL6180X\Enums\VL6180XOpCode;
+use DeptOfScrapyardRobotics\Sensors\VL6180X\VL6180XException;
+use Fabricate\Contracts\NutsAndBolts\BootScaffolding;
+use Fabricate\NutsAndBolts\Concerns\Splices16Bits;
 
-/**
- * @property-read DigitalInputInterface $interrupt_pin
- * @property-read DigitalOutputInterface $shutdown_pin
- * @property-read I2CCompatibleTransport $i2c
- */
 trait VL6180XInternalAPI
 {
     use BootScaffolding, Splices16Bits;
 
     protected int $hardwired_device_id = 0xB4;
 
-    protected function sendCommand(VL6180OpCode $register, array $command_data = []): int
+    protected function sendCommand(VL6180XOpCode $register, array $command_data = []): int
     {
         $payload = [...array_values($this->splitBytes($register->value)), ...$command_data];
-        return $this->write($payload);
+
+        return $this->transport->write($payload);
     }
 
     /**
      * @throws VL6180XException
      */
-    protected function readData(VL6180OpCode $register, int $length, int $attempts = 5): array
+    protected function readData(VL6180XOpCode $register, int $length, int $attempts = 5): array
     {
+        $address = array_values($this->splitBytes($register->value));
+
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {
-            $data = $this->i2c->writeRead([...array_values($this->splitBytes($register->value))], $length);
+            try {
+                return $this->transport->writeRead($address, $length);
+            } catch (VL6180XException $e) {
+                if ($attempt === $attempts) {
+                    throw $e;
+                }
 
-            if ($data !== false) {
-                return $data;
+                usleep(500);
             }
-
-            usleep(500);
         }
 
         throw VL6180XException::i2cReadFailed($register->value, $length);
     }
-
-
 
     /**
      * @throws VL6180XException
@@ -59,8 +55,7 @@ trait VL6180XInternalAPI
 
     protected function resetDevice(): void
     {
-        if(!empty($this->shutdown_pin))
-        {
+        if (! is_null($this->shutdown_pin)) {
             $this->shutdown_pin->low();
             usleep(2000);
             $this->shutdown_pin->high();
@@ -91,13 +86,10 @@ trait VL6180XInternalAPI
 
         foreach ($settings as $cmd) {
             $payload = [...array_values($this->splitBytes($cmd[0])), $cmd[1]];
-            $this->write($payload);
+            $this->transport->write($payload);
         }
     }
 
-    /**
-     * @return void
-     */
     protected function loadRecommendedSettings(): void
     {
         $this->int_pin_mode = $this->_int_pin_mode;
@@ -120,11 +112,5 @@ trait VL6180XInternalAPI
         if ($device_id !== $this->hardwired_device_id) {
             throw VL6180XException::invalidModelId($device_id);
         }
-    }
-
-    private function write(array $data = []): int
-    {
-        $bytes = array2bytes($data);
-        return $this->i2c->write($bytes);
     }
 }

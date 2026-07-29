@@ -2,10 +2,15 @@
 
 namespace DeptOfScrapyardRobotics\Sensors\VL6180X;
 
-use BareMetal\Contracts\Sensors\SensorException;
+use Fabricate\Contracts\Circuits\CircuitException;
 
-class VL6180XException extends SensorException
+class VL6180XException extends CircuitException
 {
+    public static function transportMissingProtocol(): static
+    {
+        return new static('VL6180X devices require an I2C capable connection.');
+    }
+
     public static function invalidModelId(int $id): static
     {
         return new static(sprintf('Invalid VL6180X model ID - 0x%02X (expected 0xB4)', $id));
