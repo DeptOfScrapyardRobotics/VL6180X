@@ -1,9 +1,10 @@
 <?php
 
-namespace DeptOfScrapyardRobotics\Sensors\VL6180X;
+namespace DeptOfScrapyardRobotics\Sensors\VL6180X\Providers;
 
-use Fabricate\NutsAndBolts\MagicAliases\Circuit;
+use DeptOfScrapyardRobotics\Sensors\VL6180X\VL6180X;
 use Fabricate\NutsAndBolts\ServiceProvider;
+use GeneralPurposeIO\Core\MagicAliases\Circuit;
 
 class VL6180XServiceProvider extends ServiceProvider
 {

@@ -4,8 +4,8 @@ namespace DeptOfScrapyardRobotics\Sensors\VL6180X\Concerns;
 
 use DeptOfScrapyardRobotics\Sensors\VL6180X\Enums\VL6180XOpCode;
 use DeptOfScrapyardRobotics\Sensors\VL6180X\VL6180XException;
-use Fabricate\Contracts\NutsAndBolts\BootScaffolding;
 use Fabricate\NutsAndBolts\Concerns\Splices16Bits;
+use GeneralPurposeIO\Contracts\Circuits\BootScaffolding;
 
 trait VL6180XInternalAPI
 {

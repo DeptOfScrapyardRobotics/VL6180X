@@ -2,7 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Sensors\VL6180X;
 
-use Fabricate\Contracts\Circuits\CircuitException;
+use GeneralPurposeIO\Contracts\Circuits\CircuitException;
 
 class VL6180XException extends CircuitException
 {
