@@ -2,22 +2,37 @@
 
 namespace DeptOfScrapyardRobotics\Sensors\VL6180X;
 
-use GeneralPurposeIO\Contracts\Circuits\CircuitException;
+use GeneralPurposeIO\Contracts\IntegratedCircuits\CircuitException;
 
 class VL6180XException extends CircuitException
 {
-    public static function transportMissingProtocol(): static
+    public static function invalidChipId(int $chip_id, int $expected_id): static
     {
-        return new static('VL6180X devices require an I2C capable connection.');
+        return new static(sprintf('Invalid VL6180X model ID: expected 0x%02X, got 0x%02X.', $expected_id, $chip_id));
     }
 
-    public static function invalidModelId(int $id): static
+    public static function invalidProperty(string $name, string $class): static
     {
-        return new static(sprintf('Invalid VL6180X model ID - 0x%02X (expected 0xB4)', $id));
+        return new static("Invalid property '{$name}' on {$class}.");
     }
 
-    public static function i2cReadFailed(int $register, int $length): static
+    public static function readFailed(int $register, int $length): static
     {
-        return new static(sprintf('I2C read failed - register 0x%04X, expected %d byte(s).', $register, $length));
+        return new static(sprintf('VL6180X register 0x%03X: the bus refused a %d byte read.', $register, $length));
+    }
+
+    public static function shortRead(int $register, int $wanted, int $got): static
+    {
+        return new static(sprintf('VL6180X register 0x%03X: wanted %d bytes, got %d.', $register, $wanted, $got));
+    }
+
+    public static function registerOutOfRange(string $name, int $value, int $max): static
+    {
+        return new static("VL6180X {$name} takes 0 to {$max}; got {$value}.");
+    }
+
+    public static function measurementTimedOut(int $timeout_ms): static
+    {
+        return new static("VL6180X range measurement not ready after {$timeout_ms} ms.");
     }
 }

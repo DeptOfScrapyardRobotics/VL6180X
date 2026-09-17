@@ -1,6 +1,5 @@
-# Directory Update Log
+# dept-of-scrapyard-robotics/vl6180x Update Log
 
-## 2026-08-11
-
-* **Update (draft)**: VL6180X implements `Waveforms\Distance\MeasuresDistance`; units are `Waveforms\Contracts\Sensors\Enums\DistanceUnit` (deleted package-local DistanceUnit). Composer requires `scrapyard-io/waveforms ^0.7`. Amended traps / AGENTS / README.
-* **Backfill**: Initial `.okf` v0.2 for `dept-of-scrapyard-robotics/vl6180x` 0.7 — package orientation, VL6180X SensorIC surface (I2C factories, BootScaffolding + Nab `Splices16Bits`, ranging), Circuits catalog `vl6180x`, traps for Fabricate leftovers / XSHUT recommended / unfinished `interrupt_pin`, lean `AGENTS.md`. Corrective after 0.7 promotion shipped without the bundle (`.gitattributes` already `export-ignore`d `.okf` + `AGENTS.md`).
+## 2026-09-16
+* **Update**: [connecting](/connecting.md) FT232H pins GPIO1 → GPIOL1, XSHUT → GPIOL2; [ranging](/ranging.md) measured status-read counts per path.
+* **Creation**: bundle seeded for 0.8.0 — [overview](/overview.md), [connecting](/connecting.md), [ranging](/ranging.md), [settings](/settings.md), [configuration](/configuration.md), four [traps](/traps/index.md).

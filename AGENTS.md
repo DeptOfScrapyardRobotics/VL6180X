@@ -2,24 +2,33 @@
 
 ## Knowledge Bundle (OKF)
 
-This package ships an Open Knowledge Format bundle at [`.okf/`](.okf/) (excluded from Composer dist via `.gitattributes` `export-ignore`).
+This package ships an Open Knowledge Format bundle at [`.okf/`](.okf/) (excluded from the Composer dist via `.gitattributes` `export-ignore`). Before changing code or advising on this package: read [`.okf/index.md`](.okf/index.md) first, open only the concepts the task needs, prefer `status: stable` over `draft`. When you learn something durable, update the affected concept(s) and append [`.okf/log.md`](.okf/log.md); new or changed concepts stay `status: draft` until a human verifies them.
 
-Before changing this package or advising on VL6180X architecture:
+Do **not** create `.okf` folders under `src/*` — knowledge for this package lives at the package root only. Transport and dock semantics belong to `scrapyard-io/framework`; point there, do not restate them here.
 
-1. Read [`.okf/index.md`](.okf/index.md) first (progressive disclosure).
-2. Open only the linked concepts needed for the task.
-3. Prefer `status: stable` concepts; treat `deprecated` as historical only. New/changed concepts stay `status: draft` until a human verifies them.
-4. When you learn something durable about **this package**, update the affected `.okf` concept(s) and append `.okf/log.md`.
-5. Keep the `.okf` bundle at the **package root** only — do not nest extra `.okf` folders under `src/`.
-6. Circuits registry semantics belong in `scrapyard-io/gpio-framework`’s `.okf`. Sibling ToF packages (`vl53lxx`, `vl53l5cx`) keep their own bundles. Do not pull tubes/display knowledge into this sensor package.
+## Where this package sits
 
-## Package rules (quick) — 0.7.x
+`ext-posi` / `ext-ftdi` → `microscrap/*` → `scrapyard-io/framework` (protocol managers, transports) → **`dept-of-scrapyard-robotics/vl6180x`** (time-of-flight range sensor driver).
 
-- Composer: `dept-of-scrapyard-robotics/vl6180x` **0.7.0**. Namespace `DeptOfScrapyardRobotics\Sensors\VL6180X\`.
-- Provider: `Providers\VL6180XServiceProvider`. Catalog slug `vl6180x` only (no package-local make-profile / smoke).
-- Requires `scrapyard-io/gpio-framework ^0.7` + `scrapyard-io/waveforms ^0.7` — **no tubes**.
-- IC extends `GeneralPurposeIO\Circuits\Types\SensorIC`, implements `BootSequence` + `Waveforms\Distance\MeasuresDistance`; factories `i2c(...)` / `fromI2CBus(...)`.
-- Attributes: `#[IntegratedCircuit('I2C')]` + `#[Pinout(['I2C' => ['driver', 'device', 'slave']])]`. Optional `interrupt_pin` / `shutdown_pin` are ctor args, not Pinout keys.
-- Boot uses `BootScaffolding`; 16-bit opcode helpers use Nab `Splices16Bits` (intentional). Units: `Waveforms\Contracts\Sensors\Enums\DistanceUnit` — no package-local DistanceUnit.
-- XSHUT (`shutdown_pin`) strongly recommended for clean boot. Leave `interrupt_pin` unset — INT path unfinished (`readRange` returns `-1`).
-- Never import `Fabricate\Contracts\Circuits\*` or `Fabricate\Circuits\*`.
+## Package rules (quick) — 0.8.x
+
+- Composer: `dept-of-scrapyard-robotics/vl6180x` **0.8.0**. PHP `^8.4|^8.5|^8.6`. Namespace `DeptOfScrapyardRobotics\Sensors\VL6180X\` → `src/`.
+- **Requires split components only**: `gpio/contracts`, `gpio/integrated-circuits`, `venusian-voyager/nuts-and-bolts`. Never `scrapyard-io/framework` or `venusian/framework`. No waveforms dependency; ranges are plain `int` millimetres. Protocol components and adapters are `suggest`.
+- **Sensor = `Bootable` + `Sensor`.** Boot: XSHUT pulse (if wired) → model ID `0xB4` → private settings only when fresh out of reset, then clear the flag → ST recommended public settings from `VL6180XConfiguration` → one VHV recalibration.
+- **The chip is readable.** Getters read the chip and record the value in the configuration; setters write the chip, then the configuration. `__get`/`__set` map properties to those methods.
+- **The configuration drives the wait path.** `interruptLine()` returns GPIO1 only when `gpio1_mode` is an interrupt output and `interrupt_config->range` is `NEW_SAMPLE_READY`; otherwise ranging polls `RESULT__INTERRUPT_STATUS_GPIO`. An idle line answers not-ready without a bus read; an asserted line is confirmed by one status read.
+- **Transport**: `VL6180XI2CTransport` — 16-bit register high byte first; throws on refused or short reads; optional GPIO1 `DigitalInTransport` and XSHUT `DigitalOutTransport`; `close()` releases the pins only.
+- **Register breakouts** are `readonly` `DataRegister`s from `gpio/integrated-circuits`.
+- **Boot bytes are pinned** in tests to ST AN4545 values. Changing a configuration default changes those bytes; update the test only with a reason.
+- **Reach the framework through MagicAliases** (`I2C::`, `DigitalIO::`), never `app('gpio.*')`.
+- **Config** merges under `circuits.vl6180x`; publish tag `vl6180x-config` → `config/circuits/vl6180x.php`. The package reads none of it.
+- **Exceptions** descend from `GeneralPurposeIO\Contracts\IntegratedCircuits\CircuitException` → `GPIOLevelException`.
+- Enums int- or string-backed, FULLY UPPERCASE cases. No class constants. `is_null($x)` over `$x === null`.
+
+## Verification
+
+```bash
+vendor/bin/pest            # recording fakes; no hardware
+```
+
+Hardware truth is a VL6180X at `0x29` on an FT232H (MPSSE I2C), GPIO1 on GPIOL1, XSHUT on GPIOL2. On MPSSE, pin `close()` closes the shared context; close the sensor last.
