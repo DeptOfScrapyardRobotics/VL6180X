@@ -23,4 +23,14 @@ final class FakeOutputPin extends DigitalOutputTransport
     }
 
     public function close(): void { $this->closed = true; }
+
+    public function handle(): string
+    {
+        return 'fake';
+    }
+
+    protected function release(): void
+    {
+        $this->closed = true;
+    }
 }

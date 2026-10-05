@@ -35,4 +35,9 @@ class VL6180XException extends CircuitException
     {
         return new static("VL6180X range measurement not ready after {$timeout_ms} ms.");
     }
+
+    public static function notConnected(string $protocol, string $driver, string|int $device): static
+    {
+        return new static("VL6180X could not get a {$protocol} connection from driver [{$driver}] on device [{$device}].");
+    }
 }

@@ -4,7 +4,7 @@ title: Ranging
 description: readRange() and its step helpers, the GPIO1 edge wait versus status-register polling, and result status breakouts.
 tags: [range, measurement, interrupts, gpio1, polling]
 status: draft
-generated: { by: claude-opus-5/claude-code, at: "2026-09-16T00:00:00Z" }
+generated: { by: claude-opus/5.5, at: 2026-10-05T01:30:00Z }
 sources:
   - id: api
     resource: src/Concerns/VL6180XAPI.php
@@ -19,7 +19,7 @@ sources:
 
 # readRange
 
-`readRange(int $timeout_ms = 1000): int` → mm. Steps: `startMeasurement()` (`SYSRANGE__START` ← 0x01) → `statusWait()` → `readRangeValue()` (`RESULT__RANGE_VAL`) → `clearInterrupt()` (`SYSTEM__INTERRUPT_CLEAR` ← 0x07).[^api] Timeout → `measurementTimedOut`. `$tof->range` = `readRange()`. ~50 ms each on FT232H.
+`readRange(int $timeout_ms = 1000): int` → mm. Steps: `startMeasurement()` (`SYSRANGE__START` ← 0x01) → `statusWait()` → `readRangeValue()` (`RESULT__RANGE_VAL`) → `clearInterrupt()` (`SYSTEM__INTERRUPT_CLEAR` ← 0x07).[^api] Timeout → `measurementTimedOut`; any other result is returned, so check `range_status->error === VL6180XRangeError::NONE` before trusting the value (past the sensor's reach it reads 255 with `RAW_RANGING_ALGO_OVERFLOW`). `$tof->range` = `readRange()`. FT232H, 0.10, GPIO1 path: 28–81 ms each; hand tracked 35–172 mm.
 
 # Wait path
 
@@ -29,7 +29,7 @@ sources:
 * `gpio1_mode->interrupt_output`
 * `interrupt_config->range === NEW_SAMPLE_READY`
 
-else null → poll.
+else null → poll, without an error: check `interruptLine()` is non-null to know the edge path is active.
 
 | | `statusReady()` | `statusWait()` |
 |---|---|---|

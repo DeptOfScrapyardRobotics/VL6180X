@@ -2,6 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Sensors\VL6180X;
 
+use DeptOfScrapyardRobotics\Sensors\VL6180X\Concerns\ConjuresVL6180X;
 use DeptOfScrapyardRobotics\Sensors\VL6180X\Concerns\VL6180XBootstrap;
 use DeptOfScrapyardRobotics\Sensors\VL6180X\Transports\VL6180XI2CTransport;
 use GeneralPurposeIO\Contracts\IntegratedCircuits\Sensor;
@@ -9,6 +10,7 @@ use GeneralPurposeIO\IntegratedCircuits\Bootable;
 
 class VL6180X extends Bootable implements Sensor
 {
+    use ConjuresVL6180X;
     use VL6180XBootstrap;
 
     protected int $hardwired_device_id = 0xB4;

@@ -203,7 +203,7 @@ it('confirms an asserted GPIO1 against the status register', function (): void {
 
 it('waits on a falling GPIO1 edge, then reads the range', function (): void {
     $gpio1 = new FakeInterruptPin(4);
-    $gpio1->listen_edges = [new DigitalEdgeEvent(SignalEdge::FALLING, 10)];
+    $gpio1->listen_edges = [new DigitalEdgeEvent(device: 0, pin: 1, edge: SignalEdge::FALLING, timestamp: 10, seqno: 1)];
     $gpio1->level_on_edge = false;
     [$chip, $bus] = vl6180x([[0x04], [0x37]], transport: new VL6180XI2CTransport($b = new FakeI2CTransport, $gpio1), bus: $b);
 
@@ -218,7 +218,7 @@ it('waits on a falling GPIO1 edge, then reads the range', function (): void {
 it('listens for rising edges and treats high as asserted when GPIO1 is active high', function (): void {
     $gpio1 = new FakeInterruptPin(4);
     $gpio1->level = false;
-    $gpio1->listen_edges = [new DigitalEdgeEvent(SignalEdge::RISING, 10)];
+    $gpio1->listen_edges = [new DigitalEdgeEvent(device: 0, pin: 1, edge: SignalEdge::RISING, timestamp: 10, seqno: 1)];
     $gpio1->level_on_edge = true;
     [$chip] = vl6180x([[0x04]],
         transport: new VL6180XI2CTransport($b = new FakeI2CTransport, $gpio1),

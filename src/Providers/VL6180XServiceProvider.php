@@ -2,6 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Sensors\VL6180X\Providers;
 
+use DeptOfScrapyardRobotics\Sensors\VL6180X\VL6180X;
 use Voyager\NutsAndBolts\ServiceProvider;
 
 /**
@@ -20,5 +21,10 @@ class VL6180XServiceProvider extends ServiceProvider
         $this->publishes([
             dirname(__DIR__, 2).'/config/vl6180x.php' => $this->app->configPath('circuits/vl6180x.php'),
         ], 'vl6180x-config');
+
+        // With the GPIO catalog installed, the sensor is conjurable by slug: app('circuit')->conjure('vl6180x').
+        if ($this->app->isBound('circuit')) {
+            $this->app->make('circuit')->addCircuit('vl6180x', VL6180X::class);
+        }
     }
 }

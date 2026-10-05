@@ -4,7 +4,7 @@ title: Settings
 description: VL6180XConfiguration defaults, read-then-record getters, write-then-record setters, property table and register breakouts.
 tags: [settings, configuration, registers, breakouts, als]
 status: draft
-generated: { by: claude-opus-5/claude-code, at: "2026-09-16T00:00:00Z" }
+generated: { by: claude-opus/5.5, at: 2026-10-05T01:30:00Z }
 sources:
   - id: configuration
     resource: src/VL6180XConfiguration.php
